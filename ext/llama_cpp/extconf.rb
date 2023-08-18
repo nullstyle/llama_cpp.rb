@@ -88,11 +88,14 @@ end
 # @!visibility private
 UNAME_M = RbConfig::CONFIG['build_cpu'] || RbConfig::CONFIG['host_cpu'] || RbConfig::CONFIG['target_cpu']
 
+INSIDE_DOCKER = with_config('inside-docker')
+puts "INSIDE_DOCKER: #{INSIDE_DOCKER}"
+
 # rubocop:disable Layout/LineLength
 if UNAME_M.match?(/x86_64|i686/) && try_compile('#include <stdio.h>', '-march=native -mtune=native')
   $CFLAGS << ' -march=native -mtune=native'
   $CXXFLAGS << ' -march=native -mtune=native'
-elsif UNAME_M.match?(/aarch64/) && try_compile('#include <stdio.h>', '-mcpu=native')
+elsif UNAME_M.match?(/aarch64/) && try_compile('#include <stdio.h>', '-mcpu=native') && !INSIDE_DOCKER
   $CFLAGS << ' -mcpu=native'
   $CXXFLAGS << ' -mcpu=native'
 elsif UNAME_M.match?(/armv6/) && try_compile('#include <stdio.h>', '-mfpu=neon-fp-armv8 -mfp16-format=ieee -mno-unaligned-access')
